@@ -8,7 +8,9 @@ import employeeRoutes from "./modules/auth/routes/employee.routes";
 import attendanceRoutes from "./modules/auth/routes/attendance.routes";
 import leaveRoutes from "./modules/auth/routes/leave.routes";
 import payrollRoutes from "./modules/payroll/routes/payroll.routes";
-
+import inventoryRoutes from "./modules/inventory/routes/inventory.routes";
+import purchaseOrderRoutes from "./modules/inventory/routes/purchaseOrder.routes";
+import goodsReceiptRoutes from "./modules/inventory/routes/goodsReceipt.routes";
 const app = express();
 app.use(express.json());
 app.use("/api/tenant", tenantRoutes);
@@ -22,6 +24,12 @@ app.use("/api/employees", employeeRoutes);
 app.use("/api/attendance", attendanceRoutes);
 app.use("/api/leaves", leaveRoutes);  
 app.use("/api/payroll", payrollRoutes);
+app.use("/api/inventory", inventoryRoutes);
+app.use("/api/purchase-orders", purchaseOrderRoutes);
+app.use("/api/goods-receipts", goodsReceiptRoutes);
+
+
+
 
 app.get("/", (_req, res) => {
   res.send("ERP API Running");

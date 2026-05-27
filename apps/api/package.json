@@ -4,7 +4,8 @@
   "main": "dist/server.js",
   "scripts": {
     "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
-     "worker:payroll": "ts-node-dev src/modules/payroll/workers/payroll.worker.ts"
+     "worker:payroll": "ts-node-dev src/modules/payroll/workers/payroll.worker.ts" ,
+     "worker:reorder": "ts-node-dev src/modules/inventory/workers/reorder.worker.ts"
   },
   "devDependencies": {
     "@types/cors": "^2.8.19",

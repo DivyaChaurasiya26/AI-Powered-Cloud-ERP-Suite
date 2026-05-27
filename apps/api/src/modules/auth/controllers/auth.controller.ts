@@ -23,6 +23,7 @@ const cleanTenantId =
     const hashedPassword = await bcrypt.hash(password, 10);
 
     // 3. create user
+  
     const user = await User.create({
       name,
       email,
