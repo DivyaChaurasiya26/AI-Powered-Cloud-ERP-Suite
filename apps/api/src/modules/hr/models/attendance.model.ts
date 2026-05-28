@@ -2,6 +2,12 @@ import { Schema, model } from "mongoose";
 
 const attendanceSchema = new Schema(
   {
+    tenantId: {
+      type: Schema.Types.ObjectId,
+      ref: "Tenant",
+      required: true,
+    },
+
     employeeId: {
       type: Schema.Types.ObjectId,
       ref: "Employee",
@@ -17,26 +23,14 @@ const attendanceSchema = new Schema(
       type: Date,
     },
 
-    overtimeHours: {
-  type: Number,
-  default: 0,
-},
-
     totalHours: {
       type: Number,
       default: 0,
     },
 
-    status: {
-      type: String,
-      enum: ["PRESENT", "ABSENT", "HALF_DAY"],
-      default: "PRESENT",
-    },
-
-    tenantId: {
-      type: Schema.Types.ObjectId,
-      ref: "Tenant",
-      required: true,
+    overtimeHours: {
+      type: Number,
+      default: 0,
     },
   },
   {

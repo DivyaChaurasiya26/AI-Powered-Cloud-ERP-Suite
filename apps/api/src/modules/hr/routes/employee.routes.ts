@@ -1,0 +1,31 @@
+import { Router } from "express";
+
+import {
+  createEmployee,
+  getEmployees,
+  getOrgChart,
+} from "../controllers/employee.controller";
+
+import { authMiddleware } from "../../auth/middleware/auth.middleware";
+
+const router = Router();
+
+router.post(
+  "/",
+  authMiddleware,
+  createEmployee
+);
+
+router.get(
+  "/",
+  authMiddleware,
+  getEmployees
+);
+
+router.get(
+  "/org-chart",
+  authMiddleware,
+  getOrgChart
+);
+
+export default router;

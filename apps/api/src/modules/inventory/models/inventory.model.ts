@@ -34,6 +34,12 @@ const inventorySchema = new Schema(
       required: true,
     },
 
+
+preferredVendorId: {
+  type: Schema.Types.ObjectId,
+  ref: "Vendor",
+  default : null,
+},
     unitPrice: {
       type: Number,
       required: true,

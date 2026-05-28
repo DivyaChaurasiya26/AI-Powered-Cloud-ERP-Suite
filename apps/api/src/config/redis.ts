@@ -1,7 +1,6 @@
-import IORedis from "ioredis";
+import { Redis } from "ioredis";
 
-export const redisConnection = new IORedis({
-  host: "127.0.0.1",
+export const redis = new Redis({
+  host: "localhost",
   port: 6379,
-  maxRetriesPerRequest: null,
 });
