@@ -1,4 +1,7 @@
-export const calculatePayroll = (
+
+import { createAutoJournalEntry } from "../../finance/services/autoLedger.service";
+
+export const calculatePayroll = async (
   grossSalary: number,
   config: any
 ) => {

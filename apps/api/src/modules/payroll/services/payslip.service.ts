@@ -1,5 +1,4 @@
 import PDFDocument from "pdfkit";
-import { createAutoJournalEntry } from "../../finance/services/autoLedger.service";
 export const generatePayslip =
   async (payroll: any) => {
     return new Promise<Buffer>(
@@ -70,6 +69,8 @@ export const generatePayslip =
         );
 
         doc.end();
+        
       }
     );
   };
+  

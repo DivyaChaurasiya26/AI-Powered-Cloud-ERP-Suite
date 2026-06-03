@@ -24,6 +24,11 @@ import fxRoutes from "./modules/finance/routes/fx.routes";
 import payslipRoutes from "./modules/payroll/routes/payslip.routes";
 import journalRoutes from "./modules/finance/routes/journal.routes";
 import vendorRoutes from "./modules/procurement/routes/vendor.routes";
+import vendorInvoiceRoutes from "./modules/finance/routes/vendorInvoice.routes";
+import vendorPaymentRoutes from "./modules/finance/routes/vendorPayment.routes";
+
+
+
 const app = express();
 app.use(express.json());
 app.use("/api/tenant", tenantRoutes);
@@ -67,6 +72,19 @@ app.use(
   "/api/payslips",
   payslipRoutes
 );
+app.use(
+  "/api/vendor-invoices",
+  vendorInvoiceRoutes
+);
+app.use(
+  "/api/vendor-payments",
+  vendorPaymentRoutes
+);
+
+
+
+
+
 app.get("/", (_req, res) => {
   res.send("ERP API Running");
 });
