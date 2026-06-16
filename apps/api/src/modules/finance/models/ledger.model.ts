@@ -44,3 +44,4 @@ const ledgerSchema = new Schema(
 );
 
 export const Ledger = model("Ledger", ledgerSchema);
+ledgerSchema.index({ tenantId: 1, date: -1 });

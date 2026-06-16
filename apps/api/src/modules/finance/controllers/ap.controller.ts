@@ -1,9 +1,8 @@
 import { Request, Response } from "express";
 
-
-
 import { createLedgerEntry } from "../services/ledger.service";
 import { APInvoice } from "../models/apInvoice.model";
+
 export const createAPInvoice = async (
   req: Request,
   res: Response
@@ -16,7 +15,6 @@ export const createAPInvoice = async (
       tenantId: user.tenantId,
     });
 
-    // finance ledger entry
     await createLedgerEntry({
       tenantId: user.tenantId,
       referenceType: "PURCHASE",
@@ -43,10 +41,13 @@ export const payInvoice = async (
   res: Response
 ) => {
   try {
+    const user = (req as any).user;
     const { invoiceId } = req.body;
 
-    const invoice =
-      await APInvoice.findById(invoiceId);
+    const invoice = await APInvoice.findOne({
+      _id: invoiceId,
+      tenantId: user.tenantId,
+    });
 
     if (!invoice) {
       return res.status(404).json({
@@ -55,7 +56,6 @@ export const payInvoice = async (
     }
 
     invoice.status = "PAID";
-
     await invoice.save();
 
     res.json({

@@ -42,3 +42,4 @@ export const Attendance = model(
   "Attendance",
   attendanceSchema
 );
+attendanceSchema.index({ tenantId: 1, employeeId: 1 });

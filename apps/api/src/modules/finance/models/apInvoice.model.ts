@@ -50,3 +50,4 @@ export const APInvoice = model(
   "APInvoice",
   apInvoiceSchema
 );
+apInvoiceSchema.index({ tenantId: 1, status: 1, createdAt: -1 });

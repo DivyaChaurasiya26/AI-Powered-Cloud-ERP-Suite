@@ -54,3 +54,4 @@ export const Inventory = model(
   "Inventory",
   inventorySchema
 );
+inventorySchema.index({ tenantId: 1 });

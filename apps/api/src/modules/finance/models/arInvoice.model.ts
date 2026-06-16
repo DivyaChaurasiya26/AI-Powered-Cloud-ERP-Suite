@@ -44,3 +44,4 @@ export const ARInvoice = model(
   "ARInvoice",
   arInvoiceSchema
 );
+arInvoiceSchema.index({ tenantId: 1, status: 1, createdAt: -1 });

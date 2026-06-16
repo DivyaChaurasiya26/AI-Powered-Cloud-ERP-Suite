@@ -57,3 +57,4 @@ export const Employee = model(
   "Employee",
   employeeSchema
 );
+employeeSchema.index({ tenantId: 1 });

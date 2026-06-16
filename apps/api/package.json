@@ -5,11 +5,14 @@
   "scripts": {
     "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
     "worker:payroll": "ts-node-dev src/modules/payroll/workers/payroll.worker.ts",
-    "worker:reorder": "ts-node-dev src/modules/inventory/workers/reorder.worker.ts"
+    "worker:reorder": "ts-node-dev src/modules/inventory/workers/reorder.worker.ts",
+    "worker:forecasting": "ts-node-dev src/modules/forecasting/workers/forecasting.worker.ts",
+    "worker:reports": "ts-node-dev src/modules/dashboard/workers/report.worker.ts"
   },
   "devDependencies": {
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
+    "@types/helmet": "^0.0.48",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^25.9.1",
     "@types/nodemailer": "^8.0.0",
@@ -19,17 +22,22 @@
     "typescript": "^6.0.3"
   },
   "dependencies": {
+    "@bull-board/api": "^8.0.0",
+    "@bull-board/express": "^8.0.0",
     "bcryptjs": "^3.0.3",
     "bullmq": "^5.77.1",
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
+    "eventemitter2": "^6.4.9",
     "express": "^5.2.1",
+    "helmet": "^8.2.0",
     "ioredis": "^5.10.1",
     "jsonwebtoken": "^9.0.3",
     "mongoose": "^9.6.2",
     "nodemailer": "^8.0.9",
     "pdf": "^0.1.0",
     "pdfkit": "^0.18.0",
+    "rate-limiter-flexible": "^11.2.0",
     "zod": "^4.4.3"
   }
 }

@@ -1,9 +1,9 @@
 import { Request, Response } from "express";
 
 import { ARInvoice } from "../models/arInvoice.model";
-
 import { createLedgerEntry } from "../services/ledger.service";
 import { generateInvoicePDF } from "../services/pdf.service";
+
 export const createARInvoice = async (
   req: Request,
   res: Response
@@ -42,10 +42,13 @@ export const receivePayment = async (
   res: Response
 ) => {
   try {
+    const user = (req as any).user;
     const { invoiceId } = req.body;
 
-    const invoice =
-      await ARInvoice.findById(invoiceId);
+    const invoice = await ARInvoice.findOne({
+      _id: invoiceId,
+      tenantId: user.tenantId,
+    });
 
     if (!invoice) {
       return res.status(404).json({
@@ -54,7 +57,6 @@ export const receivePayment = async (
     }
 
     invoice.status = "PAID";
-
     await invoice.save();
 
     res.json({
@@ -69,28 +71,29 @@ export const receivePayment = async (
   }
 };
 
-export const downloadInvoicePDF =
-  async (
-    req: Request,
-    res: Response
-  ) => {
-    try {
-      const invoice =
-        await ARInvoice.findById(
-          req.params.id
-        );
+export const downloadInvoicePDF = async (
+  req: Request,
+  res: Response
+) => {
+  try {
+    const user = (req as any).user;
 
-      if (!invoice) {
-        return res.status(404).json({
-          message: "Invoice not found",
-        });
-      }
+    const invoice = await ARInvoice.findOne({
+      _id: req.params.id,
+      tenantId: user.tenantId,
+    });
 
-      generateInvoicePDF(invoice, res);
-
-    } catch (error: any) {
-      res.status(500).json({
-        message: error.message,
+    if (!invoice) {
+      return res.status(404).json({
+        message: "Invoice not found",
       });
     }
-  };
+
+    generateInvoicePDF(invoice, res);
+
+  } catch (error: any) {
+    res.status(500).json({
+      message: error.message,
+    });
+  }
+};

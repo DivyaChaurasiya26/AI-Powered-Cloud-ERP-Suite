@@ -59,3 +59,4 @@ export const Payroll = model(
   "Payroll",
   payrollSchema
 );
+payrollSchema.index({ tenantId: 1, employeeId: 1 });

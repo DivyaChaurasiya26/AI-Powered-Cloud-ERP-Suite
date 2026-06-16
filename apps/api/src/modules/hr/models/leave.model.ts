@@ -62,3 +62,4 @@ export const Leave = model(
   "Leave",
   leaveSchema
 );
+leaveSchema.index({ tenantId: 1, employeeId: 1 });
