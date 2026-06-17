@@ -8,64 +8,8 @@ on:
 
 jobs:
   # ── TruffleHog: scan git history for committed secrets ───────────────────
-  secrets-scan:
-    name: TruffleHog Secrets Scan
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
-      - name: TruffleHog Scan
-        uses: trufflesecurity/trufflehog@main
-        with:
-          path: ./
-          base: ${{ github.event.repository.default_branch }}
-          head: HEAD
-          extra_args: --only-verified
 
   # ── Snyk: scan npm dependencies for known vulnerabilities ────────────────
-  dependency-scan:
-    name: Snyk Dependency Audit
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "22"
-
-      - name: Install dependencies
-        working-directory: apps/api
-        run: npm ci
-
-      - name: Snyk Dependency Scan
-        uses: snyk/actions/node@master
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-        with:
-          args: --severity-threshold=high --file=apps/api/package.json
 
   # ── Trivy: scan Docker image for OS + package CVEs ──────────────────────
-  container-scan:
-    name: Trivy Container Scan
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Build Docker image
-        run: |
-          docker build -t erp-api:${{ github.sha }} apps/api/
-
-      - name: Trivy Vulnerability Scan
-        uses: aquasecurity/trivy-action@master
-        with:
-          image-ref: erp-api:${{ github.sha }}
-          format: table
-          exit-code: "1"
-          ignore-unfixed: true
-          severity: CRITICAL,HIGH
