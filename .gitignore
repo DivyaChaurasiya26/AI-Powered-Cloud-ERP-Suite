@@ -1,5 +1,11 @@
-node_modules
+node_modules/
 .env
-dist
-build
-pnpm-lock.yaml.idea/
+dist/
+build/
+
+# Lock files
+pnpm-lock.yaml
+
+# IDE files
+.idea/
+*.iml
