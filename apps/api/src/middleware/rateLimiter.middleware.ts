@@ -1,26 +1,20 @@
 import { Request, Response, NextFunction } from "express";
-import { RateLimiterRedis } from "rate-limiter-flexible";
-import { redis } from "../config/redis";
+import { RateLimiterMemory } from "rate-limiter-flexible";
 
-// ── General limiter: 100 requests / 60 seconds per IP ─────────────────────
-const generalLimiter = new RateLimiterRedis({
-  storeClient: redis,
-  keyPrefix: "rl_general",
+// General limiter: 100 requests / minute
+const generalLimiter = new RateLimiterMemory({
   points: 100,
   duration: 60,
 });
 
-// ── Auth limiter: 10 requests / 15 minutes per IP ─────────────────────────
-// Protects /api/auth/login and /api/auth/register from brute force
-const authLimiter = new RateLimiterRedis({
-  storeClient: redis,
-  keyPrefix: "rl_auth",
+// Auth limiter: 10 requests / 15 minutes
+const authLimiter = new RateLimiterMemory({
   points: 10,
-  duration: 900, // 15 minutes
+  duration: 900,
 });
 
 const limitHandler = (
-  limiter: RateLimiterRedis,
+  limiter: RateLimiterMemory,
   req: Request,
   res: Response,
   next: NextFunction
