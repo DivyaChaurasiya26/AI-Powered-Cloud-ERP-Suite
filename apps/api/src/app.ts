@@ -56,30 +56,30 @@ import notificationRoutes from "./modules/notifications/routes/notification.rout
 import "./modules/notifications/services/notification.service"; // registers eventBus listener
 
 // Bull Board
-import { createBullBoard } from "@bull-board/api";
-import { BullMQAdapter } from "@bull-board/api/bullMQAdapter";
-import { ExpressAdapter } from "@bull-board/express";
-import { emailQueue } from "./modules/notifications/queues/email.queue";
-import { webhookQueue } from "./modules/notifications/queues/webhook.queue";
-import { payrollQueue } from "./modules/payroll/queues/payroll.queue";
-import { reorderQueue } from "./modules/inventory/queues/reorder.queue";
-import { reportQueue } from "./modules/dashboard/queues/report.queue";
-import { forecastingQueue } from "./modules/forecasting/queues/forecasting.queue";
+//import { createBullBoard } from "@bull-board/api";
+//iimport { BullMQAdapter } from "@bull-board/api/bullMQAdapter";
+//iimport { ExpressAdapter } from "@bull-board/express";
+//iimport { emailQueue } from "./modules/notifications/queues/email.queue";
+//iimport { webhookQueue } from "./modules/notifications/queues/webhook.queue";
+//iimport { payrollQueue } from "./modules/payroll/queues/payroll.queue";
+//iimport { reorderQueue } from "./modules/inventory/queues/reorder.queue";
+//iimport { reportQueue } from "./modules/dashboard/queues/report.queue";
+//iimport { forecastingQueue } from "./modules/forecasting/queues/forecasting.queue";
 
 // ── Bull Board setup ──────────────────────────────────────────────────────
-const serverAdapter = new ExpressAdapter();
-serverAdapter.setBasePath("/admin/queues");
-createBullBoard({
-  queues: [
-    new BullMQAdapter(emailQueue),
-    new BullMQAdapter(webhookQueue),
-    new BullMQAdapter(payrollQueue),
-    new BullMQAdapter(reorderQueue),
-    new BullMQAdapter(reportQueue),
-    new BullMQAdapter(forecastingQueue),
-  ],
-  serverAdapter,
-});
+//const serverAdapter = new ExpressAdapter();
+//serverAdapter.setBasePath("/admin/queues");
+//createBullBoard({
+//  queues: [
+//    new BullMQAdapter(emailQueue),
+//    new BullMQAdapter(webhookQueue),
+//    new BullMQAdapter(payrollQueue),
+//    new BullMQAdapter(reorderQueue),
+//    new BullMQAdapter(reportQueue),
+//    new BullMQAdapter(forecastingQueue),
+//  ],
+//  serverAdapter,
+//});
 
 const app = express();
 
@@ -181,12 +181,12 @@ app.use("/api/milestones", milestoneRoutes);
 app.use("/api/notifications", notificationRoutes);
 
 // ── Bull Board UI (ADMIN only) ────────────────────────────────────────────
-app.use(
-  "/admin/queues",
-  authMiddleware,
-  roleMiddleware(["ADMIN"]),
-  serverAdapter.getRouter()
-);
+// app.use(
+//   "/admin/queues",
+//   authMiddleware,
+//   roleMiddleware(["ADMIN"]),
+//   serverAdapter.getRouter()
+// );
 
 // ── Utility routes ────────────────────────────────────────────────────────
 app.get("/", (_req, res) => {
