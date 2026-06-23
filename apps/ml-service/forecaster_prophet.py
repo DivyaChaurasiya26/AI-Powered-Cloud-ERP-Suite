@@ -4,10 +4,17 @@ Prophet-based SKU demand forecasting.
 Used for all SKUs as the primary forecasting engine.
 """
 
+import importlib
+import importlib.util
 import logging
 import numpy as np
 import pandas as pd
-from prophet import Prophet
+
+try:
+    from prophet import Prophet
+except ImportError:
+    from fbprophet import Prophet
+
 from model_registry import save_prophet, load_prophet, prophet_meta
 
 logger = logging.getLogger(__name__)
@@ -26,7 +33,7 @@ def train(sku: str, history: list) -> dict:
     df["y"] = pd.to_numeric(df["y"], errors="coerce").fillna(0).clip(lower=0)
     df = df.sort_values("ds").reset_index(drop=True)
 
-    model = Prophet(
+    model = prophet.prophet.Prophet(
         yearly_seasonality=True,
         weekly_seasonality=True,
         daily_seasonality=False,

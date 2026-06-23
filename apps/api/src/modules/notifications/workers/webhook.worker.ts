@@ -4,6 +4,10 @@ import { redis } from "../../../config/redis";
 
 import { deliverWebhook } from "../services/webhook.service";
 
+if (!redis) {
+  throw new Error("[webhook-worker] Redis connection not available");
+}
+
 new Worker(
   "webhookQueue",
 
