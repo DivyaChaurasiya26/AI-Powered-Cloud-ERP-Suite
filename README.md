@@ -56,3 +56,14 @@ A scalable **multi-tenant ERP backend system** built using **Node.js, Express, T
 ---
 
 ## ⚙️ Project Structure
+Docker Setup
+
+CI/CD Pipeline
+
+Kubernetes Deployment
+
+Monitoring
+
+Cloud Deployment
+
+Security
