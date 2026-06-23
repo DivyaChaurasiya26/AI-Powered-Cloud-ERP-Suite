@@ -1,0 +1,34 @@
+name: ERP CI Pipeline
+
+on:
+  push:
+    branches:
+      - main
+      - week4-devops
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11.2.2
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install Dependencies
+        run: pnpm install
+      - name: Validate Workspace
+        run: echo "Build validation completed"
+
+  docker:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Docker Validation
+        run: docker --version

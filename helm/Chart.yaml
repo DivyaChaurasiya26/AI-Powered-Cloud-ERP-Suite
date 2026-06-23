@@ -1,0 +1,4 @@
+apiVersion: v2
+name: ai-powered-erp
+version: 1.0.0
+description: AI Powered Cloud ERP Suite

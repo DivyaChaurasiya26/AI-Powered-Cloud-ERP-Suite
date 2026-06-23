@@ -233,10 +233,12 @@ export const addDependency = async (
       });
     }
 
-    const cycleDetected = await wouldCreateCycle(
-      req.params.id,
-      dependsOnTaskId
-    );
+    const taskId = String(req.params.id);
+
+const cycleDetected = await wouldCreateCycle(
+  taskId,
+  dependsOnTaskId
+);
 
     if (cycleDetected) {
       return res.status(400).json({
