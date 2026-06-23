@@ -1,36 +1,36 @@
 version: "3.9"
 
 services:
-api:
-build:
-context: ./apps/api
-container_name: erp-api
-ports:
-- "5000:5000"
-environment:
-NODE_ENV: production
-restart: unless-stopped
+  api:
+    build:
+      context: ./apps/api
+    container_name: erp-api
+    ports:
+      - "5000:5000"
+    environment:
+      NODE_ENV: production
+    restart: unless-stopped
 
-ml-service:
-build:
-context: ./apps/ml-service
-container_name: erp-ml
-ports:
-- "8000:8000"
-restart: unless-stopped
+  ml-service:
+    build:
+      context: ./apps/ml-service
+    container_name: erp-ml
+    ports:
+      - "8000:8000"
+    restart: unless-stopped
 
-redis:
-image: redis:7
-container_name: erp-redis
-ports:
-- "6379:6379"
+  redis:
+    image: redis:7
+    container_name: erp-redis
+    ports:
+      - "6379:6379"
 
-postgres:
-image: postgres:16
-container_name: erp-postgres
-ports:
-- "5432:5432"
-environment:
-POSTGRES_USER: postgres
-POSTGRES_PASSWORD: postgres
-POSTGRES_DB: erp
+  postgres:
+    image: postgres:16
+    container_name: erp-postgres
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: erp
