@@ -3,8 +3,7 @@ node_modules/
 dist/
 build/
 
-# Lock files
-pnpm-lock.yaml
+
 
 # IDE files
 .idea/
