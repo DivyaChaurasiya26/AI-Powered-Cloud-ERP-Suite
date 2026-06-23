@@ -58,11 +58,13 @@ export const editWidget = async (
   try {
     const user = (req as any).user;
 
-    const widget = await updateWidget(
-      user.tenantId,
-      req.params.id,
-      req.body
-    );
+    const widgetId = String(req.params.id);
+
+const widget = await updateWidget(
+  user.tenantId,
+  widgetId,
+  req.body
+);
 
     if (!widget) {
       return res.status(404).json({
@@ -83,8 +85,9 @@ export const removeWidget = async (
 ) => {
   try {
     const user = (req as any).user;
+    const widgetId = String(req.params.id);
 
-    await deleteWidget(user.tenantId, req.params.id);
+    await deleteWidget(user.tenantId, widgetId);
 
     res.json({ message: "Widget removed" });
 
