@@ -1,6 +1,6 @@
 import { Router } from "express";
 
-import { receiveGoods } from "../controllers/goodsReceipt.controller";
+import { receiveGoods, getGoodsReceipts } from "../controllers/goodsReceipt.controller";
 
 import { authMiddleware } from "../../auth/middleware/auth.middleware";
 
@@ -10,6 +10,12 @@ router.post(
   "/",
   authMiddleware,
   receiveGoods
+);
+
+router.get(
+  "/",
+  authMiddleware,
+  getGoodsReceipts
 );
 
 export default router;

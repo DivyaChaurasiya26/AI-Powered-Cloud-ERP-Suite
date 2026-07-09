@@ -10,7 +10,7 @@ on:
       - main
 
 jobs:
-  build:
+  build-and-test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -20,15 +20,36 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
+          cache: pnpm
       - name: Install Dependencies
-        run: pnpm install
-      - name: Validate Workspace
-        run: echo "Build validation completed"
+        run: pnpm install --frozen-lockfile
+      - name: Lint
+        run: pnpm -r run lint
+      - name: Build
+        run: pnpm -r run build
+      - name: Test API
+        run: pnpm --filter api run test
 
-  docker:
-    needs: build
+  ml-service-test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Docker Validation
-        run: docker --version
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install dependencies
+        run: pip install -r apps/ml-service/requirements-dev.txt
+      - name: Run tests
+        run: pytest apps/ml-service
+
+  docker:
+    needs: [build-and-test, ml-service-test]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build API image
+        run: docker build -t erp-api:ci ./apps/api
+      - name: Build ML service image
+        run: docker build -t erp-ml:ci ./apps/ml-service
+      - name: Build Web image
+        run: docker build -t erp-web:ci ./apps/web

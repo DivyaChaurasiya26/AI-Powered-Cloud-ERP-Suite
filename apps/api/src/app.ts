@@ -55,31 +55,45 @@ import milestoneRoutes from "./modules/projects/routes/milestone.routes";
 import notificationRoutes from "./modules/notifications/routes/notification.routes";
 import "./modules/notifications/services/notification.service"; // registers eventBus listener
 
+// Anomaly Detection & Intelligent Approvals
+import anomalyRoutes from "./modules/anomaly/routes/anomaly.routes";
+import approvalsRoutes from "./modules/approvals/routes/approvals.routes";
+
+// Audit Log & GDPR (F-09)
+import auditRoutes from "./modules/audit/routes/audit.routes";
+import { auditLogger } from "./modules/audit/middleware/auditLogger.middleware";
+
+// Health & Metrics
+import { metricsRegistry } from "./config/metrics";
+
+// API docs (F-11)
+import { serveApiDocs } from "./config/openapi";
+
 // Bull Board
-import { createBullBoard } from "@bull-board/api";
-import { BullMQAdapter } from "@bull-board/api/bullMQAdapter";
-import { ExpressAdapter } from "@bull-board/express";
-import { emailQueue } from "./modules/notifications/queues/email.queue";
-import { webhookQueue } from "./modules/notifications/queues/webhook.queue";
-import { payrollQueue } from "./modules/payroll/queues/payroll.queue";
-import { reorderQueue } from "./modules/inventory/queues/reorder.queue";
-import { reportQueue } from "./modules/dashboard/queues/report.queue";
-import { forecastingQueue } from "./modules/forecasting/queues/forecasting.queue";
+//import { createBullBoard } from "@bull-board/api";
+//iimport { BullMQAdapter } from "@bull-board/api/bullMQAdapter";
+//iimport { ExpressAdapter } from "@bull-board/express";
+//iimport { emailQueue } from "./modules/notifications/queues/email.queue";
+//iimport { webhookQueue } from "./modules/notifications/queues/webhook.queue";
+//iimport { payrollQueue } from "./modules/payroll/queues/payroll.queue";
+//iimport { reorderQueue } from "./modules/inventory/queues/reorder.queue";
+//iimport { reportQueue } from "./modules/dashboard/queues/report.queue";
+//iimport { forecastingQueue } from "./modules/forecasting/queues/forecasting.queue";
 
 // ── Bull Board setup ──────────────────────────────────────────────────────
-const serverAdapter = new ExpressAdapter();
-serverAdapter.setBasePath("/admin/queues");
-createBullBoard({
-  queues: [
-    new BullMQAdapter(emailQueue),
-    new BullMQAdapter(webhookQueue),
-    new BullMQAdapter(payrollQueue),
-    new BullMQAdapter(reorderQueue),
-    new BullMQAdapter(reportQueue),
-    new BullMQAdapter(forecastingQueue),
-  ],
-  serverAdapter,
-});
+//const serverAdapter = new ExpressAdapter();
+//serverAdapter.setBasePath("/admin/queues");
+//createBullBoard({
+//  queues: [
+//    new BullMQAdapter(emailQueue),
+//    new BullMQAdapter(webhookQueue),
+//    new BullMQAdapter(payrollQueue),
+//    new BullMQAdapter(reorderQueue),
+//    new BullMQAdapter(reportQueue),
+//    new BullMQAdapter(forecastingQueue),
+//  ],
+//  serverAdapter,
+//});
 
 const app = express();
 
@@ -135,6 +149,9 @@ app.use(express.urlencoded({ extended: true, limit: "10kb" }));
 // ── Global rate limiter ───────────────────────────────────────────────────
 app.use(rateLimiter);
 
+// ── Tenant-wide mutation audit trail (F-09) ──────────────────────────────
+app.use(auditLogger);
+
 // ── Auth & Tenant ─────────────────────────────────────────────────────────
 app.use("/api/auth", authRateLimiter, authRoutes);
 app.use("/api/tenant", tenantRoutes);
@@ -180,17 +197,34 @@ app.use("/api/milestones", milestoneRoutes);
 // ── Notifications ─────────────────────────────────────────────────────────
 app.use("/api/notifications", notificationRoutes);
 
+// ── Anomaly Detection & Intelligent Approvals ────────────────────────────
+app.use("/api/anomaly", anomalyRoutes);
+app.use("/api/approvals", approvalsRoutes);
+
+// ── Audit Log & GDPR (F-09) ───────────────────────────────────────────────
+app.use("/api/audit-log", auditRoutes);
+
 // ── Bull Board UI (ADMIN only) ────────────────────────────────────────────
-app.use(
-  "/admin/queues",
-  authMiddleware,
-  roleMiddleware(["ADMIN"]),
-  serverAdapter.getRouter()
-);
+// app.use(
+//   "/admin/queues",
+//   authMiddleware,
+//   roleMiddleware(["ADMIN"]),
+//   serverAdapter.getRouter()
+// );
 
 // ── Utility routes ────────────────────────────────────────────────────────
 app.get("/", (_req, res) => {
   res.send("ERP API Running");
+});
+
+// ── Health & Metrics (unauthenticated — used by k8s probes & Prometheus) ──
+app.get("/health", (_req, res) => {
+  res.status(200).json({ status: "ok", service: "erp-api" });
+});
+
+app.get("/metrics", async (_req, res) => {
+  res.set("Content-Type", metricsRegistry.contentType);
+  res.end(await metricsRegistry.metrics());
 });
 
 app.get("/api/protected", authMiddleware, (req, res) => {
@@ -208,5 +242,8 @@ app.get(
     res.json({ message: "Welcome Admin 👑" });
   }
 );
+
+// ── OpenAPI docs (F-11) ───────────────────────────────────────────────────
+serveApiDocs(app);
 
 export default app;

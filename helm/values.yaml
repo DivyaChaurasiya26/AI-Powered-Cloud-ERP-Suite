@@ -1,0 +1,66 @@
+# Default values for ai-powered-erp.
+# Local-images setup: build erp-api/erp-ml/erp-web locally and load them into
+# your cluster before `helm install` — pullPolicy IfNotPresent won't try to
+# fetch from a registry if the image already exists on the node. Point
+# image.repository at a real registry path (e.g. ghcr.io/you/erp-api) once
+# you have one.
+
+api:
+  image:
+    repository: erp-api
+    tag: local
+    pullPolicy: IfNotPresent
+  replicas: 2
+  port: 5000
+  resources:
+    requests: { cpu: 100m, memory: 256Mi }
+    limits: { cpu: 500m, memory: 512Mi }
+
+mlService:
+  image:
+    repository: erp-ml
+    tag: local
+    pullPolicy: IfNotPresent
+  replicas: 1
+  port: 8000
+  resources:
+    requests: { cpu: 200m, memory: 512Mi }
+    limits: { cpu: "1", memory: 1Gi }
+
+web:
+  image:
+    repository: erp-web
+    tag: local
+    pullPolicy: IfNotPresent
+  replicas: 2
+  port: 8080
+  nodePort: 30080
+  resources:
+    requests: { cpu: 50m, memory: 64Mi }
+    limits: { cpu: 200m, memory: 128Mi }
+
+redis:
+  image: redis:7
+  replicas: 1
+  port: 6379
+  resources:
+    requests: { cpu: 50m, memory: 64Mi }
+    limits: { cpu: 250m, memory: 256Mi }
+
+config:
+  nodeEnv: production
+  redisHost: redis
+  redisPort: "6379"
+  redisUrl: redis://redis:6379
+  allowedOrigins: "http://localhost:5173,http://localhost:8080"
+  mlServiceUrl: "http://ml-service:8000"
+  modelStorePath: /app/models
+
+# Leave blank and override at install time — never commit real values:
+#   helm install erp-suite ./helm \
+#     --set secrets.mongoUri="mongodb+srv://..." \
+#     --set secrets.jwtSecret="$(openssl rand -hex 64)"
+# or pass a separate, gitignored file: -f helm/values.local.yaml
+secrets:
+  mongoUri: ""
+  jwtSecret: ""

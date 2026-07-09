@@ -48,6 +48,21 @@ const notificationPreferenceSchema = new Schema(
       default: () => ({}),
     },
 
+    ANOMALY_DETECTED: {
+      type: channelPrefsSchema,
+      default: () => ({}),
+    },
+
+    APPROVAL_REQUIRED: {
+      type: channelPrefsSchema,
+      default: () => ({}),
+    },
+
+    APPROVAL_DECIDED: {
+      type: channelPrefsSchema,
+      default: () => ({}),
+    },
+
     webhookUrl: {
       type: String,
       default: "",

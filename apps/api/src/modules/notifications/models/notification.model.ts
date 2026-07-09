@@ -23,6 +23,9 @@ const notificationSchema = new Schema(
         "PAYROLL_PROCESSED",
         "LOW_STOCK",
         "FORECAST_GENERATED",
+        "ANOMALY_DETECTED",
+        "APPROVAL_REQUIRED",
+        "APPROVAL_DECIDED",
       ],
     },
 

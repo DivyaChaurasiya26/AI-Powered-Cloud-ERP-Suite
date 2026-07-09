@@ -7,8 +7,16 @@ services:
     container_name: erp-api
     ports:
       - "5000:5000"
+    env_file:
+      - ./apps/api/.env
     environment:
       NODE_ENV: production
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      ML_SERVICE_URL: http://ml-service:8000
+      ALLOWED_ORIGINS: http://localhost:5173,http://localhost:8080
+    depends_on:
+      - redis
     restart: unless-stopped
 
   ml-service:
@@ -17,6 +25,20 @@ services:
     container_name: erp-ml
     ports:
       - "8000:8000"
+    environment:
+      REDIS_URL: redis://redis:6379
+    depends_on:
+      - redis
+    restart: unless-stopped
+
+  web:
+    build:
+      context: ./apps/web
+    container_name: erp-web
+    ports:
+      - "8080:8080"
+    depends_on:
+      - api
     restart: unless-stopped
 
   redis:

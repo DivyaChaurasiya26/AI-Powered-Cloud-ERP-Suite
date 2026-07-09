@@ -1,0 +1,13 @@
+{
+  "name": "AI-Powered Cloud ERP Suite",
+  "short_name": "ERP Suite",
+  "description": "Multi-tenant ERP: finance, HR, inventory, projects, AI forecasting.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#f9f9f7",
+  "theme_color": "#2a78d6",
+  "icons": [
+    { "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}

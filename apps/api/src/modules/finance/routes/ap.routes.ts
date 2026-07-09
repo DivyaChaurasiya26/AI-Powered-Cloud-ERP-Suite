@@ -2,6 +2,7 @@ import { Router } from "express";
 
 import {
   createAPInvoice,
+  getAPInvoices,
   payInvoice,
 } from "../controllers/ap.controller";
 
@@ -26,6 +27,12 @@ router.patch(
   authMiddleware,
   validate(payInvoiceSchema),
   payInvoice
+);
+
+router.get(
+  "/invoice",
+  authMiddleware,
+  getAPInvoices
 );
 
 export default router;

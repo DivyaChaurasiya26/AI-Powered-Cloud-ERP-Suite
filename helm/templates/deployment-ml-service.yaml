@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ml-service
+  labels:
+    app: erp-ml
+spec:
+  replicas: {{ .Values.mlService.replicas }}
+  selector:
+    matchLabels:
+      app: erp-ml
+  template:
+    metadata:
+      labels:
+        app: erp-ml
+    spec:
+      containers:
+        - name: ml-service
+          image: "{{ .Values.mlService.image.repository }}:{{ .Values.mlService.image.tag }}"
+          imagePullPolicy: {{ .Values.mlService.image.pullPolicy }}
+          ports:
+            - containerPort: {{ .Values.mlService.port }}
+          env:
+            - name: PORT
+              valueFrom:
+                configMapKeyRef: { name: erp-config, key: ML_SERVICE_PORT }
+            - name: REDIS_URL
+              valueFrom:
+                configMapKeyRef: { name: erp-config, key: REDIS_URL }
+            - name: MODEL_STORE_PATH
+              valueFrom:
+                configMapKeyRef: { name: erp-config, key: MODEL_STORE_PATH }
+          resources:
+            {{- toYaml .Values.mlService.resources | nindent 12 }}
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: {{ .Values.mlService.port }}
+            initialDelaySeconds: 15
+            periodSeconds: 20
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: {{ .Values.mlService.port }}
+            initialDelaySeconds: 10
+            periodSeconds: 10

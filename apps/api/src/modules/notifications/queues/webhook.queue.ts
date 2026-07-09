@@ -5,7 +5,8 @@ import { redis } from "../../../config/redis";
 export const webhookQueue = new Queue(
   "webhookQueue",
   {
-    connection: redis,
+    // redis may be typed as Redis | null — cast to any to satisfy Queue connection typing
+    connection: redis as any,
     defaultJobOptions: {
       attempts: 3,
       backoff: {
