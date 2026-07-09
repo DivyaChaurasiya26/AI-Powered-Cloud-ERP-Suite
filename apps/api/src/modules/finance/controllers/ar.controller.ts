@@ -37,6 +37,27 @@ export const createARInvoice = async (
   }
 };
 
+export const getARInvoices = async (
+  req: Request,
+  res: Response
+) => {
+  try {
+    const user = (req as any).user;
+    const { status } = req.query;
+
+    const filter: Record<string, unknown> = { tenantId: user.tenantId };
+    if (status) filter.status = status;
+
+    const invoices = await ARInvoice.find(filter).sort({ createdAt: -1 });
+    res.json({ invoices });
+
+  } catch (error: any) {
+    res.status(500).json({
+      message: error.message,
+    });
+  }
+};
+
 export const receivePayment = async (
   req: Request,
   res: Response

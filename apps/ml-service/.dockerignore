@@ -1,0 +1,6 @@
+tests
+.env
+.venv
+__pycache__
+*.pyc
+models

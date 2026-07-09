@@ -2,6 +2,7 @@ import { Router } from "express";
 
 import {
   createARInvoice,
+  getARInvoices,
   receivePayment,
   downloadInvoicePDF,
 } from "../controllers/ar.controller";
@@ -33,6 +34,12 @@ router.get(
   "/invoice/:id/pdf",
   authMiddleware,
   downloadInvoicePDF
+);
+
+router.get(
+  "/invoice",
+  authMiddleware,
+  getARInvoices
 );
 
 export default router;

@@ -2,7 +2,24 @@ import { Request, Response } from "express";
 
 import { VendorInvoice } from "../models/vendorInvoice.model";
 import { VendorPayment } from "../models/vendorPayment.model";
-import { createAutoJournalEntry } from "../services/autoLedger.service";
+import { submitForApproval } from "../../approvals/services/approval.service";
+
+export const getVendorPayments = async (
+  req: Request,
+  res: Response
+) => {
+  try {
+    const user = (req as any).user;
+
+    const payments = await VendorPayment.find({ tenantId: user.tenantId }).sort({ createdAt: -1 });
+    res.json({ payments });
+
+  } catch (error: any) {
+    res.status(500).json({
+      message: error.message,
+    });
+  }
+};
 
 export const payVendorInvoice = async (
   req: Request,
@@ -29,19 +46,21 @@ export const payVendorInvoice = async (
       });
     }
 
-    const payment = await VendorPayment.create({
-      tenantId: invoice.tenantId,
-      invoiceId: invoice._id,
-      amount: invoice.invoiceAmount,
-      paymentMethod,
+    const { autoApproved, request, result } = await submitForApproval({
+      entityType: "VENDOR_PAYMENT",
+      entityId: invoice._id,
+      tenantId: user.tenantId,
+      requestedBy: user.id,
+      amount: invoice.invoiceAmount as unknown as number,
+      payload: { paymentMethod },
     });
 
-    invoice.status = "PAID";
-    await invoice.save();
-
-    res.status(201).json({
-      message: "Invoice paid successfully",
-      payment,
+    res.status(autoApproved ? 201 : 202).json({
+      message: autoApproved
+        ? "Invoice paid successfully"
+        : "Payment risk-flagged — pending approval",
+      payment: result,
+      approvalRequest: request,
     });
 
   } catch (error: any) {

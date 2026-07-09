@@ -1,3 +1,4 @@
+import { Types } from "mongoose";
 import { ARInvoice } from "../../finance/models/arInvoice.model";
 import { APInvoice } from "../../finance/models/apInvoice.model";
 import { Ledger } from "../../finance/models/ledger.model";
@@ -6,20 +7,29 @@ import { Employee } from "../../hr/models/employee.model";
 import { Payroll } from "../../payroll/models/payroll.model";
 import { redis } from "../../../config/redis";
 
+// Aggregation $match does not auto-cast strings to ObjectId the way
+// find()/countDocuments() do, and tenantId always arrives as a string from
+// the decoded JWT — every aggregate pipeline below must cast explicitly.
+const toTenantObjectId = (tenantId: any) =>
+  tenantId instanceof Types.ObjectId ? tenantId : new Types.ObjectId(tenantId);
+
 const KPI_TTL = 60; // seconds — KPI data acceptable to be 60s stale
 
 // ── Cache helpers (same pattern as forecasting.service.ts) ───────────────────
 
 const getKpiCache = async (key: string): Promise<any | null> => {
+  if (!redis) return null;
   const raw = await redis.get(key);
   return raw ? JSON.parse(raw) : null;
 };
 
 const setKpiCache = async (key: string, data: any): Promise<void> => {
+  if (!redis) return;
   await redis.setex(key, KPI_TTL, JSON.stringify(data));
 };
 
 export const invalidateKpiCache = async (tenantId: string): Promise<void> => {
+  if (!redis) return;
   // Called from AP/AR controllers on mutations that change KPI values
   await redis.del(`kpis:revenue:${tenantId}`);
   await redis.del(`kpis:expenses:${tenantId}`);
@@ -37,7 +47,7 @@ export const getRevenueKPIs = async (
   const cached = await getKpiCache(cacheKey);
   if (cached) return cached;
 
-  const match: any = { tenantId };
+  const match: any = { tenantId: toTenantObjectId(tenantId) };
 
   if (filters.startDate || filters.endDate) {
     match.createdAt = {};
@@ -77,7 +87,7 @@ export const getExpenseKPIs = async (
   const cached = await getKpiCache(cacheKey);
   if (cached) return cached;
 
-  const match: any = { tenantId };
+  const match: any = { tenantId: toTenantObjectId(tenantId) };
 
   if (filters.startDate || filters.endDate) {
     match.createdAt = {};
@@ -116,7 +126,7 @@ export const getInventoryKPIs = async (
   const cached = await getKpiCache(cacheKey);
   if (cached) return cached;
 
-  const match: any = { tenantId };
+  const match: any = { tenantId: toTenantObjectId(tenantId) };
 
   const [result] = await Inventory.aggregate([
     { $match: match },
@@ -152,7 +162,7 @@ export const getPayrollKPIs = async (
   const [headcount, payrollAgg] = await Promise.all([
     Employee.countDocuments({ tenantId }),
     Payroll.aggregate([
-      { $match: { tenantId } },
+      { $match: { tenantId: toTenantObjectId(tenantId) } },
       {
         $group: {
           _id: null,
@@ -179,7 +189,7 @@ export const getLedgerMonthlySeries = async (
   tenantId: string,
   filters: any = {}
 ) => {
-  const match: any = { tenantId };
+  const match: any = { tenantId: toTenantObjectId(tenantId) };
 
   if (filters.startDate || filters.endDate) {
     match.date = {};
@@ -213,7 +223,7 @@ export const getRevenueMonthlySeries = async (
   tenantId: string,
   filters: any = {}
 ) => {
-  const match: any = { tenantId };
+  const match: any = { tenantId: toTenantObjectId(tenantId) };
 
   if (filters.startDate || filters.endDate) {
     match.createdAt = {};
@@ -246,7 +256,7 @@ export const getExpenseMonthlySeries = async (
   tenantId: string,
   filters: any = {}
 ) => {
-  const match: any = { tenantId };
+  const match: any = { tenantId: toTenantObjectId(tenantId) };
 
   if (filters.startDate || filters.endDate) {
     match.createdAt = {};

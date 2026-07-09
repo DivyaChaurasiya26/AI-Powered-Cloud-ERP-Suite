@@ -1,0 +1,15 @@
+# NodePort (not an Ingress, per current scope) so the dashboard is reachable
+# without an ingress controller — e.g. `kubectl port-forward svc/web 8080:8080`
+# or, on `kind` with a matching extraPortMappings entry, http://localhost:{{ .Values.web.nodePort }}.
+apiVersion: v1
+kind: Service
+metadata:
+  name: web
+spec:
+  type: NodePort
+  selector:
+    app: erp-web
+  ports:
+    - port: {{ .Values.web.port }}
+      targetPort: {{ .Values.web.port }}
+      nodePort: {{ .Values.web.nodePort }}

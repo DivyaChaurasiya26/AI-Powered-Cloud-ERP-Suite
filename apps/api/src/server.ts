@@ -20,3 +20,5 @@ const startServer = async () => {
     console.log(`Server running on port ${PORT}`);
   });
 };
+
+startServer();

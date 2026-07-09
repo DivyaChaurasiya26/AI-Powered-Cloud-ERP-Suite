@@ -61,6 +61,7 @@ export const callMLRetrainJob = (
 export const getCachedForecast = async (
   sku: string
 ): Promise<any | null> => {
+  if (!redis) return null;
   const raw = await redis.get(`forecast:${sku}`);
   return raw ? JSON.parse(raw) : null;
 };
@@ -69,6 +70,7 @@ export const cacheForecast = async (
   sku: string,
   data: any
 ): Promise<void> => {
+  if (!redis) return;
   await redis.setex(
     `forecast:${sku}`,
     CACHE_TTL_SECONDS,
@@ -79,5 +81,6 @@ export const cacheForecast = async (
 export const invalidateForecastCache = async (
   sku: string
 ): Promise<void> => {
+  if (!redis) return;
   await redis.del(`forecast:${sku}`);
 };

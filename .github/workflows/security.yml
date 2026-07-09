@@ -8,8 +8,45 @@ on:
 
 jobs:
   # ── TruffleHog: scan git history for committed secrets ───────────────────
+  trufflehog:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: TruffleHog OSS
+        uses: trufflesecurity/trufflehog@main
+        with:
+          path: ./
+          extra_args: --only-verified
 
+  # ── Trivy: scan the built API Docker image for OS + package CVEs ─────────
+  trivy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build API image for scanning
+        run: docker build -t erp-api:scan ./apps/api
+      - name: Trivy vulnerability scan
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: erp-api:scan
+          severity: HIGH,CRITICAL
+          exit-code: "1"
 
   # ── Snyk: scan npm dependencies for known vulnerabilities ────────────────
-
-  # ── Trivy: scan Docker image for OS + package CVEs ──────────────────────
+  # Only runs once a SNYK_TOKEN secret is configured for this repo; skips
+  # cleanly (rather than failing CI) when it isn't, since it requires an
+  # account token that can't be provisioned automatically.
+  snyk:
+    runs-on: ubuntu-latest
+    if: ${{ secrets.SNYK_TOKEN != '' }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run Snyk to check for vulnerabilities
+        uses: snyk/actions/node@master
+        continue-on-error: true
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          args: --severity-threshold=high

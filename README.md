@@ -15,7 +15,9 @@ AI-Powered Cloud ERP Suite is a scalable ERP platform designed to manage core bu
 * Project Management
 * Notifications & Event Processing
 * AI Demand Forecasting
-* Business Intelligence Dashboard
+* AI Anomaly Detection
+* Intelligent Approval Workflows
+* Business Intelligence Dashboard (API + React frontend)
 
 The system combines enterprise software engineering practices with machine learning capabilities to improve operational efficiency and business decision-making.
 
@@ -57,6 +59,12 @@ The system combines enterprise software engineering practices with machine learn
 * Express.js
 * TypeScript
 
+## Frontend
+
+* React
+* Vite
+* React Router
+
 ## Database
 
 * MongoDB Atlas
@@ -91,7 +99,11 @@ AI-Powered-Cloud-ERP-Suite
 │
 ├── apps
 │   ├── api
-│   └── ml-service
+│   ├── ml-service
+│   └── web
+│
+├── docs
+│   └── adr          # Architecture Decision Records
 │
 ├── helm
 │
@@ -111,11 +123,30 @@ AI-Powered-Cloud-ERP-Suite
 
 ---
 
+# 🗂 Architecture Decision Records
+
+Key architecture trade-offs (MongoDB vs. Postgres, JWT vs. OIDC SSO,
+Vite SPA vs. Next.js, BullMQ/Redis for async work, the hash-chained
+audit log) are written up as ADRs in [`docs/adr/`](docs/adr/README.md)
+— each one states the decision, the reasoning, and the honest
+consequences/gaps it creates, not just the upside.
+
+---
+
+# 📖 API Documentation
+
+An OpenAPI 3.1 spec covering every route is served at `/api-docs`
+(interactive Redoc UI) and `/api/openapi.json` (raw spec) once the API
+is running.
+
+---
+
 # ✨ Features
 
 ## 🔐 Authentication & Authorization
 
 * JWT Authentication
+* TOTP-based two-factor authentication (any authenticator app — Google Authenticator, Authy, 1Password…), self-service setup/disable under Audit & Compliance → Security
 * Role-Based Access Control (RBAC)
 * Multi-Tenant Support
 
@@ -188,6 +219,39 @@ AI-Powered-Cloud-ERP-Suite
 
 ---
 
+## 🚨 AI Anomaly Detection
+
+* Statistical outlier detection (z-score + IQR) on vendor payments and inventory movements
+* Severity scoring (LOW / MEDIUM / HIGH) with tenant-scoped review workflow
+* Real-time detection on transaction creation, plus a scheduled daily scan job
+* High-severity flags trigger notifications to tenant admins
+
+---
+
+## ✅ Intelligent Approvals
+
+* Rule + risk-score engine (transaction amount, linked anomaly flags) for vendor payments
+* Low-risk transactions auto-approve and process immediately
+* High-risk transactions route to a pending queue for admin approval/rejection
+* Full audit trail (risk score, risk factors, decision, decided-by, timestamps)
+
+---
+
+## 🛡 Audit & Compliance
+
+* Tenant-wide, append-only audit trail for every mutation (`POST`/`PUT`/`PATCH`/`DELETE`) across every module
+* Hash-chained log entries — `GET /api/audit-log/chain-status` recomputes and verifies the chain to detect tampering
+* GDPR self-service: `GET /api/audit-log/gdpr/export` (Art. 15/20 data export) and `POST /api/audit-log/gdpr/erase` (Art. 17 right to erasure)
+
+---
+
+## 📲 Progressive Web App
+
+* Installable (`manifest.webmanifest`) with an offline-capable app shell
+* Service worker (`apps/web/public/sw.js`) caches the shell and the last-seen response for GET API reads, so the dashboard still renders (with stale data) when offline
+
+---
+
 # ⚙️ Local Setup
 
 ## Clone Repository
@@ -227,6 +291,30 @@ pip install -r requirements.txt
 
 ---
 
+## Frontend Setup
+
+```bash
+cd apps/web
+pnpm install
+pnpm dev
+```
+
+---
+
+# 🧪 Testing
+
+```bash
+# API — Jest + Supertest + mongodb-memory-server
+pnpm --filter api test
+
+# ML service — pytest
+cd apps/ml-service
+pip install -r requirements-dev.txt
+pytest
+```
+
+---
+
 # 🔧 Environment Variables
 
 ```env
@@ -242,6 +330,16 @@ REDIS_PORT=6379
 
 NODE_ENV=production
 ```
+
+---
+
+# 🚀 Fastest Path to a Live URL
+
+`render.yaml` at the repo root is a Render Blueprint — it provisions the
+API, Redis, and the web frontend as one deploy. See
+[`docs/deploy/render.md`](docs/deploy/render.md) for the full walkthrough
+(two manual steps: your MongoDB URI, and wiring the two services'
+generated URLs together after the first deploy).
 
 ---
 
@@ -263,10 +361,28 @@ docker-compose up
 
 # ☸ Kubernetes Deployment
 
-Apply Deployment
+Manifests target a local-images setup (no external registry, no ingress controller assumed) — build the three app images and load them into your cluster first:
 
 ```bash
-kubectl apply -f k8s/
+docker build -t erp-api:local apps/api
+docker build -t erp-ml:local apps/ml-service
+docker build -t erp-web:local apps/web
+
+# e.g. on kind:
+kind load docker-image erp-api:local erp-ml:local erp-web:local
+```
+
+Copy the secret template and fill in real values (`k8s/secret.yaml` is gitignored — never commit real secrets):
+
+```bash
+cp k8s/secret.example.yaml k8s/secret.yaml
+# edit k8s/secret.yaml: set MONGO_URI and JWT_SECRET
+```
+
+Apply:
+
+```bash
+kubectl apply -f k8s/configmap.yaml -f k8s/secret.yaml -f k8s/deployment.yaml -f k8s/service.yaml
 ```
 
 Check Pods
@@ -275,14 +391,22 @@ Check Pods
 kubectl get pods
 ```
 
+Reach the dashboard — it's a `NodePort` Service (no Ingress configured yet):
+
+```bash
+kubectl port-forward svc/web 8080:8080
+```
+
 ---
 
 # ⎈ Helm Deployment
 
-Install Helm Chart
+Install Helm Chart — pass secrets at install time rather than committing them to `values.yaml`:
 
 ```bash
-helm install erp-suite ./helm
+helm install erp-suite ./helm \
+  --set secrets.mongoUri="<your MONGO_URI>" \
+  --set secrets.jwtSecret="$(openssl rand -hex 64)"
 ```
 
 Upgrade Deployment
@@ -301,11 +425,15 @@ Prometheus configuration is available in:
 monitoring/prometheus.yml
 ```
 
+It scrapes the API's `GET /metrics` endpoint (Node.js process/runtime metrics via `prom-client`). `GET /health` is also exposed, unauthenticated, for Kubernetes liveness/readiness probes.
+
 Used for:
 
 * Metrics Collection
 * Service Monitoring
 * Observability
+
+Grafana, Loki, and OpenTelemetry are not yet wired up — Prometheus scraping is the current extent of the observability stack.
 
 ---
 

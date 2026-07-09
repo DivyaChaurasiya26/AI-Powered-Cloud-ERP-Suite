@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: erp-config
+data:
+  NODE_ENV: {{ .Values.config.nodeEnv | quote }}
+  API_PORT: {{ .Values.api.port | quote }}
+  ML_SERVICE_PORT: {{ .Values.mlService.port | quote }}
+  ML_SERVICE_URL: {{ .Values.config.mlServiceUrl | quote }}
+  REDIS_HOST: {{ .Values.config.redisHost | quote }}
+  REDIS_PORT: {{ .Values.config.redisPort | quote }}
+  REDIS_URL: {{ .Values.config.redisUrl | quote }}
+  MODEL_STORE_PATH: {{ .Values.config.modelStorePath | quote }}
+  ALLOWED_ORIGINS: {{ .Values.config.allowedOrigins | quote }}

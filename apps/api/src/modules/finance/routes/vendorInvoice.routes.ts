@@ -1,6 +1,6 @@
 import { Router } from "express";
 
-import { createVendorInvoice } from "../controllers/vendorInvoice.controller";
+import { createVendorInvoice, getVendorInvoices } from "../controllers/vendorInvoice.controller";
 
 import { authMiddleware } from "../../auth/middleware/auth.middleware";
 
@@ -10,6 +10,12 @@ router.post(
   "/",
   authMiddleware,
   createVendorInvoice
+);
+
+router.get(
+  "/",
+  authMiddleware,
+  getVendorInvoices
 );
 
 export default router;

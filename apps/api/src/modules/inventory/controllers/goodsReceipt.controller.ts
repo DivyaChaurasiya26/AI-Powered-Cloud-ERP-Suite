@@ -7,6 +7,25 @@ import { PurchaseOrder } from "../models/purchaseOrder.model";
 import { Inventory } from "../models/inventory.model";
 import { GoodsReceipt } from "../models/goodsReceipt.model";
 import { reorderQueue } from "../queues/reorder.queue";
+import { detectInventoryMovementAnomaly } from "../../anomaly/services/anomalyDetection.service";
+
+export const getGoodsReceipts = async (
+  req: Request,
+  res: Response
+) => {
+  try {
+    const user = (req as any).user;
+
+    const receipts = await GoodsReceipt.find({ tenantId: user.tenantId }).sort({ createdAt: -1 });
+    res.json({ receipts });
+
+  } catch (error: any) {
+    res.status(500).json({
+      message: error.message,
+    });
+  }
+};
+
 export const receiveGoods = async (
   req: Request,
   res: Response
@@ -53,6 +72,13 @@ if (
     }
   );
 }
+
+await detectInventoryMovementAnomaly(
+  user.tenantId,
+  grn._id,
+  item.inventoryItemId,
+  item.quantityReceived
+);
     }
 
     // update PO status

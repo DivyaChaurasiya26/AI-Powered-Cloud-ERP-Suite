@@ -36,6 +36,27 @@ export const createAPInvoice = async (
   }
 };
 
+export const getAPInvoices = async (
+  req: Request,
+  res: Response
+) => {
+  try {
+    const user = (req as any).user;
+    const { status } = req.query;
+
+    const filter: Record<string, unknown> = { tenantId: user.tenantId };
+    if (status) filter.status = status;
+
+    const invoices = await APInvoice.find(filter).sort({ createdAt: -1 });
+    res.json({ invoices });
+
+  } catch (error: any) {
+    res.status(500).json({
+      message: error.message,
+    });
+  }
+};
+
 export const payInvoice = async (
   req: Request,
   res: Response

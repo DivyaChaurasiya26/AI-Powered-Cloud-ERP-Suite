@@ -1,6 +1,6 @@
 import { Router } from "express";
 
-import { runPayroll } from "../controllers/payroll.controller";
+import { runPayroll, getPayrollRecords } from "../controllers/payroll.controller";
 
 import { authMiddleware } from "../../auth/middleware/auth.middleware";
 
@@ -10,6 +10,12 @@ router.post(
   "/run",
   authMiddleware,
   runPayroll
+);
+
+router.get(
+  "/",
+  authMiddleware,
+  getPayrollRecords
 );
 
 export default router;

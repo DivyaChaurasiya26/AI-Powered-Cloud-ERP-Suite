@@ -53,7 +53,7 @@ This risk is accepted and documented. A future enhancement could add an explicit
 
 ## Dependency Scanning
 
-Snyk runs on every push to `main` via `.github/workflows/security.yml`. To run locally:
+Snyk runs on every push to `main` via `.github/workflows/security.yml`, once a `SNYK_TOKEN` repository secret is configured — it requires an account token that isn't provisioned by default, so the job skips cleanly (rather than failing CI) until one is added. To run locally:
 ```bash
 npx snyk test --severity-threshold=high
 ```

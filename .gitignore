@@ -2,6 +2,8 @@ node_modules/
 .env
 dist/
 build/
+k8s/secret.yaml
+helm/values.local.yaml
 
 
 
